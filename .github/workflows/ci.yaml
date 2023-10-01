@@ -21,4 +21,4 @@ jobs:
       - name: Install dependencies
         run: python3 -m pip install tox
       - name: Run tests
-        run: tox -vve py38
+        run: tox -vve unit
