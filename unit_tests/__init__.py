@@ -33,3 +33,6 @@ charms_openstack.test_mocks.mock_charmhelpers()
 
 apt_pkg = mock.MagicMock()
 sys.modules['apt_pkg'] = apt_pkg
+
+charms = mock.MagicMock()
+sys.modules['charms.leadership'] = charms.leadership
