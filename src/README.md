@@ -73,7 +73,19 @@ juju config neutron-api flat-network-providers="physnet1 physnet2"
 juju config neutron-gateway bridge-mappings="physnet1:br-ex physnet2:br-trove" data-port="br-ex:eth2 br-trove:eth3"
 juju config neutron-openvswitch bridge-mappings="physnet2:br-trove" data-port="br-trove:eth2"
 
-# Define the flat OpenStack network and subnet.
+# After the charm has been deployed, define the flat OpenStack network, and subnet
+# with a route to the Management Network.
+juju run-action trove/leader create-management-network physical-network=physnet2 \
+  cidr=10.8.102.0/24 destination-cidr=10.8.11.0/24 nexthop=10.8.102.1
+
+# The action above can be used to create VLAN networks as well. For more information
+# about the action and its parameters, run:
+juju show-action trove create-management-network
+
+# The created resources can be retrieved by running:
+openstack network list --tag charm-trove
+
+# Alternatively, these resources can be created manually:
 openstack network create --share --provider-network-type=flat \
   --provider-physical-network=physnet2 --description "Trove management network" trove-net
 
