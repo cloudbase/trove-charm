@@ -241,5 +241,33 @@ juju config trove nova-keypair=trove-keypair
 ```
 
 
+## Troubleshooting
+
+Each deployed database instance is connected to **2 networks**:
+- `tenant-net`
+- `trove-net`
+
+The **tenant-net port** has a security group (`trove-sg-$TROVE_INSTANCE_UUID`) that allows egress and ingress traffic specific to the database created.
+
+The **trove-net port** has a security group based on the charm `management-security-groups` config option:
+- If not set, the security group will be `trove-sec-group` (`openstack security group list --tag charm-trove`) that allows the RabbitMQ traffic through the `mgmt-net`.
+- If set, the security group will be `management-security-group` that allows the traffic through the `mgmt-net` based on the specific rules that are set.
+
+**NOTE**: A `trove_sg-uuid` security group is created for every instance.\
+**NOTE**: The `trove-sec-group` security group is shared across the instances.
+
+In order to SSH into the database instances through the public IP, a `security group rule` that enables access must be added to the `trove_sg-uuid`.
+
+```bash
+# An example on how to add a ssh rule to your instance
+openstack security group rule create trove_sg-uuid \
+  --protocol tcp --dst-port 22:23 --ingress --ethertype ipv4
+```
+
+If the RabbitMQ has been configured to run with **self-signed** certificates, the Trove database instances may fail to become ``Active`` and ``Healthy``, as they cannot verify the **self-signed** certificates. Here are a few suggestions for this issue:
+- Instead of self-signed certificates, use certificates signed by trusted CAs.
+- Build custom images with the root CA certificate installed into their trust stores.
+
+
 ## Restrictions
 
